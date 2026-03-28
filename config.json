@@ -1,0 +1,11 @@
+{
+  "gpio_chip": "gpiochip0",
+  "dht_pin": 17,
+  "ultrasonic_trigger_pin": 23,
+  "ultrasonic_echo_pin": 24,
+  "button_pin": 25,
+  "led_pin": 27,
+  "relay_pin": 22,
+  "poll_interval_ms": 1000
+}
+
