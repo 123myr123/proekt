@@ -106,6 +106,11 @@ bool DeviceManager::initDevices() {
         logError("Failed to initialize relay actuator");
         return false;
     }
+    database_ = std::make_unique<Database>(config_.databasePath);
+    if (!database_->open()) {
+        logError("failed to open SQLite database: "+config_.databasePath);
+        return false;
+    }
 
     initialized_ = true;
     logInfo("All devices initialized successfully");
