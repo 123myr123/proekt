@@ -86,6 +86,8 @@ bool DeviceManager::initDevices() {
     led_ = std::make_unique<LedActuator>("LED", config_.gpioChip, config_.ledPin);
     relay_ = std::make_unique<RelayActuator>("Relay", config_.gpioChip, config_.relayPin);
 
+    if (database_ && !database_->(staus_,))
+
     if (!dht_->init()) {
         logError("Failed to initialize DHT sensor");
         return false;

@@ -6,7 +6,7 @@
   "button_pin": 25,
   "led_pin": 27,
   "relay_pin": 22,
-  "poll_interval_ms": 1000
+  "poll_interval_ms": 1000,
   "database_path":"../data/devise.db"
 }
 
