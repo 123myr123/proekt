@@ -51,3 +51,20 @@ bool Database::open(){
     }
     return true
 }
+bool Database::insertReading(const DeviceStatus& status, const std::string& timestamp){
+    sqlite3* db static_cast<sqlite3*>(dbHandle_)
+
+    if(!db){
+        return false;
+    }
+
+    const char* sql ="???"
+
+    sqlite3_stmt* stmt = nullptr;
+
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepary_v2(db, sql, static_cast<int>(std::strlen(sql)), &stmt, nullptr) != SQLITE_OK){
+        return false;
+    }
+}
+    sqlite3_bind_text(stmt, 1, timestamp)
