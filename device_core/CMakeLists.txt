@@ -9,7 +9,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SOURCES
     src/main.cpp
+<<<<<<< HEAD
     src/database.cpp
+=======
+    spc/database.cpp
+>>>>>>> f7c46d2f507956a02b7d83a1ccc315605694b261
     src/device_manager.cpp
     src/dht_sensor.cpp
     src/ultrasonic_sensor.cpp
