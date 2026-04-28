@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <thread>
 
 namespace {
@@ -33,7 +34,11 @@ void logError(const std::string& message) {
     std::cerr << "[" << currentTimestamp() << "][ERROR] " << message << std::endl;
 }
 
-} // namespace
+bool isValidBcmPin(int pin) {
+    return pin >= 0 && pin <= 27;
+}
+
+}
 
 DeviceManager::DeviceManager() = default;
 
@@ -68,11 +73,37 @@ bool DeviceManager::loadConfig(const std::string& path) {
     if (root.isMember("relay_pin")) {
         config_.relayPin = root["relay_pin"].asInt();
     }
+    if (root.isMember("relay_distance_threshold_cm")) {
+        config_.relayDistanceThresholdCm = root["relay_distance_threshold_cm"].asFloat();
+    }
     if (root.isMember("poll_interval_ms")) {
-        config_.pollInterval = std::chrono::milliseconds(root["poll_interval_ms"].asInt());
+        config_.pollIntervalMs = root["poll_interval_ms"].asInt();
+    }
+    if (root.isMember("database_path")) {
+        config_.databasePath = root["database_path"].asString();
+    }
+    if (root.isMember("simulate_hardware")) {
+        config_.simulateHardware = root["simulate_hardware"].asBool();
+    }
+
+    if (!isValidBcmPin(config_.dhtPin) ||
+        !isValidBcmPin(config_.ultrasonicTriggerPin) ||
+        !isValidBcmPin(config_.ultrasonicEchoPin) ||
+        !isValidBcmPin(config_.buttonPin) ||
+        !isValidBcmPin(config_.ledPin) ||
+        !isValidBcmPin(config_.relayPin)) {
+        logError("One or more configured GPIO pins are outside BCM 0..27 range.");
+        return false;
+    }
+
+    if (config_.pollIntervalMs <= 0) {
+        config_.pollIntervalMs = 1000;
     }
 
     logInfo("Configuration loaded from " + path);
+    if (config_.simulateHardware) {
+        logInfo("simulate_hardware: using fake GPIO (demo / container)");
+    }
     return true;
 }
 
@@ -81,10 +112,15 @@ bool DeviceManager::initDevices() {
 
     dht_ = std::make_unique<DhtSensor>("DHT", config_.gpioChip, config_.dhtPin);
     ultrasonic_ = std::make_unique<UltrasonicSensor>("Ultrasonic", config_.gpioChip,
-                                                     config_.ultrasonicTriggerPin, config_.ultrasonicEchoPin);
-    button_ = std::make_unique<DigitalSensor>("Button", config_.gpioChip, config_.buttonPin);
-    led_ = std::make_unique<LedActuator>("LED", config_.gpioChip, config_.ledPin);
-    relay_ = std::make_unique<RelayActuator>("Relay", config_.gpioChip, config_.relayPin);
+                                                     config_.ultrasonicTriggerPin, config_.ultrasonicEchoPin,
+                                                     config_.simulateHardware);
+    button_ = std::make_unique<DigitalSensor>("Button", config_.gpioChip, config_.buttonPin, true,
+                                              config_.simulateHardware);
+    led_ = std::make_unique<LedActuator>("LED", config_.gpioChip, config_.ledPin, true, config_.simulateHardware);
+    relay_ = std::make_unique<RelayActuator>("Relay", config_.gpioChip, config_.relayPin, true,
+                                             config_.simulateHardware);
+
+    if (database_ && !database_->(staus_,))
 
     if (!dht_->init()) {
         logError("Failed to initialize DHT sensor");
@@ -106,9 +142,10 @@ bool DeviceManager::initDevices() {
         logError("Failed to initialize relay actuator");
         return false;
     }
+
     database_ = std::make_unique<Database>(config_.databasePath);
     if (!database_->open()) {
-        logError("failed to open SQLite database: "+config_.databasePath);
+        logError("Failed to open SQLite database: " + config_.databasePath);
         return false;
     }
 
@@ -129,17 +166,21 @@ void DeviceManager::runMainLoop() {
         if (dht_->read()) {
             status_.temperatureC = dht_->getTemperatureC();
             status_.humidityPercent = dht_->getHumidityPercent();
+        } else {
+            logError("DHT read failed");
         }
 
         if (ultrasonic_->read()) {
             status_.distanceCm = ultrasonic_->getDistanceCm();
+        } else {
+            logError("Ultrasonic read failed");
         }
 
         if (button_->read()) {
             status_.buttonActive = button_->isActive();
+        } else {
+            logError("Button read failed");
         }
-
-        const float distanceThresholdCm = 20.0f;
 
         bool desiredLedState = status_.buttonActive;
         if (desiredLedState != status_.ledOn) {
@@ -148,7 +189,8 @@ void DeviceManager::runMainLoop() {
             }
         }
 
-        bool desiredRelayState = status_.distanceCm > 0.0f && status_.distanceCm < distanceThresholdCm;
+        bool desiredRelayState =
+            status_.distanceCm > 0.0f && status_.distanceCm < config_.relayDistanceThresholdCm;
         if (desiredRelayState != status_.relayOn) {
             if (relay_->setState(desiredRelayState)) {
                 status_.relayOn = desiredRelayState;
@@ -162,15 +204,19 @@ void DeviceManager::runMainLoop() {
                 ", LED=" + std::string(status_.ledOn ? "ON" : "OFF") +
                 ", Relay=" + std::string(status_.relayOn ? "ON" : "OFF"));
 
-        std::this_thread::sleep_for(config_.pollInterval);
+        if (database_ && !database_->insertReading(status_, currentTimestamp())) {
+            logError("SQLite insert failed");
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(config_.pollIntervalMs));
     }
 }
 
-DeviceStatus DeviceManager::getStatus() const noexcept {
+DeviceStatus DeviceManager::getStatus() const {
     return status_;
 }
 
-const DeviceConfig& DeviceManager::getConfig() const noexcept {
+const DeviceConfig& DeviceManager::getConfig() const {
     return config_;
 }
 

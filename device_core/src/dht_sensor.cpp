@@ -16,7 +16,7 @@ float randomInRange(float min, float max) {
     return dist(rng);
 }
 
-} // namespace
+}
 
 DhtSensor::DhtSensor(const std::string& name,
                      const std::string& chipName,

@@ -1,0 +1,26 @@
+services:
+  iot-lab:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: iot_device_full_lab
+    ports:
+      - "6080:6080"
+      - "8080:8080"
+    init: true
+    environment:
+      VNC_PASSWORD: ${VNC_PASSWORD:-changeme}
+      VNC_RESOLUTION: ${VNC_RESOLUTION:-1600x900}
+    volumes:
+      - student_workspace:/home/student/workspace
+    shm_size: "256mb"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/api/readings >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  student_workspace:

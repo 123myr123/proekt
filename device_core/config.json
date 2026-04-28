@@ -1,4 +1,5 @@
 {
+  "simulate_hardware": true,
   "gpio_chip": "gpiochip0",
   "dht_pin": 17,
   "ultrasonic_trigger_pin": 23,
@@ -6,7 +7,13 @@
   "button_pin": 25,
   "led_pin": 27,
   "relay_pin": 22,
-  "poll_interval_ms": 1000
+<<<<<<< HEAD
+  "relay_distance_threshold_cm": 20.0,
+  "poll_interval_ms": 1000,
+  "database_path": "../data/device.db"
+=======
+  "poll_interval_ms": 1000,
   "database_path":"../data/devise.db"
+>>>>>>> f7c46d2f507956a02b7d83a1ccc315605694b261
 }
 

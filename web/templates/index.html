@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IoT — показания</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1.5rem; background: #f6f7f9; color: #222; }
+    h1 { font-size: 1.25rem; }
+    table { border-collapse: collapse; width: 100%; max-width: 960px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    th, td { border: 1px solid #ddd; padding: .5rem .6rem; text-align: left; font-size: .9rem; }
+    th { background: #eef1f5; }
+    tr:nth-child(even) { background: #fafbfc; }
+    .muted { color: #666; font-size: .85rem; margin-top: .5rem; }
+    .on { color: #0a7; font-weight: 600; }
+    .off { color: #888; }
+  </style>
+</head>
+<body>
+  <h1>Показания датчиков и состояние выходов</h1>
+  <p class="muted">Данные из SQLite (записывает служба device_core). Обновление страницы: каждые 5 с.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Время</th>
+        <th>T, °C</th>
+        <th>Влажность, %</th>
+        <th>Расстояние, см</th>
+        <th>Кнопка</th>
+        <th>LED</th>
+        <th>Реле</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.recorded_at }}</td>
+        <td>{{ "%.1f"|format(r.temperature_c) }}</td>
+        <td>{{ "%.1f"|format(r.humidity_percent) }}</td>
+        <td>{{ "%.1f"|format(r.distance_cm) }}</td>
+        <td class="{{ 'on' if r.button_active else 'off' }}">{{ 'да' if r.button_active else 'нет' }}</td>
+        <td class="{{ 'on' if r.led_on else 'off' }}">{{ 'вкл' if r.led_on else 'выкл' }}</td>
+        <td class="{{ 'on' if r.relay_on else 'off' }}">{{ 'вкл' if r.relay_on else 'выкл' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">Нет данных. Запустите iot_device_core или проверьте путь к БД (IOT_DB_PATH).</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <script>
+    setTimeout(function () { location.reload(); }, 5000);
+  </script>
+</body>
+</html>

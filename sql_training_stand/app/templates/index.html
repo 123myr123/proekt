@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тренировочный SQL-стенд</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #111; }
+    h1, h2 { margin-bottom: 8px; }
+    p, li { line-height: 1.4; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; margin-bottom: 24px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f4f4f4; }
+    code { background: #f6f6f6; padding: 2px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Тренировочный SQL-стенд</h1>
+  <p>На этой странице можно посмотреть данные из простой реляционной схемы.</p>
+  <p>Примеры запросов находятся в <code>sql/practice_queries.sql</code>.</p>
+
+  <h2>Топ курсов по выручке</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Курс</th>
+        <th>Заказы</th>
+        <th>Выручка (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in best_courses %}
+      <tr>
+        <td>{{ row.title }}</td>
+        <td>{{ row.orders_count }}</td>
+        <td>{{ row.revenue_usd }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Последние заказы</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Студент</th>
+        <th>Курс</th>
+        <th>Сумма (USD)</th>
+        <th>Дата заказа</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in recent_orders %}
+      <tr>
+        <td>{{ row.id }}</td>
+        <td>{{ row.student }}</td>
+        <td>{{ row.course }}</td>
+        <td>{{ row.total_usd }}</td>
+        <td>{{ row.ordered_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

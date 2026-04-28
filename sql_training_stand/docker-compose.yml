@@ -1,0 +1,24 @@
+services:
+  sql-training-stand:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sql_training_stand
+    ports:
+      - "8090:8090"
+    environment:
+      DB_PATH: /workspace/data/training.db
+      PORT: ${PORT:-8090}
+    volumes:
+      - sql_training_data:/workspace/data
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8090/api/summary >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+volumes:
+  sql_training_data:

@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <random>
 #include <thread>
 
 namespace {
@@ -10,16 +11,24 @@ void logError(const std::string& message) {
     std::cerr << "[ERROR] " << message << std::endl;
 }
 
-} // namespace
+float randomCm(float minCm, float maxCm) {
+    static std::mt19937 rng{std::random_device{}()};
+    std::uniform_real_distribution<float> dist(minCm, maxCm);
+    return dist(rng);
+}
+
+}
 
 UltrasonicSensor::UltrasonicSensor(const std::string& name,
                                    const std::string& chipName,
                                    int triggerOffset,
-                                   int echoOffset)
+                                   int echoOffset,
+                                   bool simulate)
     : SensorBase(name),
       chipName_(chipName),
       triggerOffset_(triggerOffset),
-      echoOffset_(echoOffset) {}
+      echoOffset_(echoOffset),
+      simulate_(simulate) {}
 
 UltrasonicSensor::~UltrasonicSensor() {
     if (triggerLine_) {
@@ -37,6 +46,9 @@ UltrasonicSensor::~UltrasonicSensor() {
 }
 
 bool UltrasonicSensor::init() {
+    if (simulate_) {
+        return true;
+    }
     chip_ = gpiod_chip_open_by_name(chipName_.c_str());
     if (!chip_) {
         logError("Failed to open GPIO chip: " + chipName_);
@@ -64,6 +76,10 @@ bool UltrasonicSensor::init() {
 }
 
 bool UltrasonicSensor::read() {
+    if (simulate_) {
+        lastDistanceCm_ = randomCm(5.0f, 90.0f);
+        return true;
+    }
     if (!triggerLine_ || !echoLine_) {
         logError("Ultrasonic sensor lines are not initialized");
         return false;

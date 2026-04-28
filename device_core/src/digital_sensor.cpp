@@ -1,7 +1,7 @@
 #include "digital_sensor.h"
 
-#include <chrono>
 #include <iostream>
+#include <random>
 
 namespace {
 
@@ -9,16 +9,18 @@ void logError(const std::string& message) {
     std::cerr << "[ERROR] " << message << std::endl;
 }
 
-} // namespace
+}
 
 DigitalSensor::DigitalSensor(const std::string& name,
                              const std::string& chipName,
                              int lineOffset,
-                             bool activeHigh)
+                             bool activeHigh,
+                             bool simulate)
     : SensorBase(name),
       chipName_(chipName),
       lineOffset_(lineOffset),
-      activeHigh_(activeHigh) {}
+      activeHigh_(activeHigh),
+      simulate_(simulate) {}
 
 DigitalSensor::~DigitalSensor() {
     if (line_) {
@@ -32,6 +34,9 @@ DigitalSensor::~DigitalSensor() {
 }
 
 bool DigitalSensor::init() {
+    if (simulate_) {
+        return true;
+    }
     chip_ = gpiod_chip_open_by_name(chipName_.c_str());
     if (!chip_) {
         logError("Failed to open GPIO chip: " + chipName_);
@@ -53,6 +58,12 @@ bool DigitalSensor::init() {
 }
 
 bool DigitalSensor::read() {
+    if (simulate_) {
+        static std::mt19937 rng{std::random_device{}()};
+        std::bernoulli_distribution dist(0.4);
+        lastValue_ = dist(rng);
+        return true;
+    }
     if (!line_) {
         logError("Digital sensor line is not initialized");
         return false;

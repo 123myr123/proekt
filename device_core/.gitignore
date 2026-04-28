@@ -1,0 +1,11 @@
+build/
+cmake-build-*/
+.cache/
+compile_commands.json
+*.o
+*.a
+*.so
+.DS_Store
+.vs/
+out/
+docs/.$*.bkp

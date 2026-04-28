@@ -1,13 +1,19 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
 project(iot_device_core LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SOURCES
     src/main.cpp
+<<<<<<< HEAD
+    src/database.cpp
+=======
+    spc/database.cpp
+>>>>>>> f7c46d2f507956a02b7d83a1ccc315605694b261
     src/device_manager.cpp
     src/dht_sensor.cpp
     src/ultrasonic_sensor.cpp
@@ -24,6 +30,7 @@ target_include_directories(iot_device_core
 )
 
 find_package(PkgConfig REQUIRED)
+find_package(SQLite3 REQUIRED)
 pkg_check_modules(GPIOD REQUIRED libgpiod)
 pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
@@ -35,6 +42,7 @@ target_include_directories(iot_device_core
 
 target_link_libraries(iot_device_core
     PRIVATE
+        SQLite::SQLite3
         ${GPIOD_LIBRARIES}
         ${JSONCPP_LIBRARIES}
 )
@@ -43,5 +51,11 @@ target_compile_options(iot_device_core
     PRIVATE
         ${GPIOD_CFLAGS_OTHER}
         ${JSONCPP_CFLAGS_OTHER}
+        -Wall
+        -Wextra
+        -Wpedantic
 )
+
+install(TARGETS iot_device_core RUNTIME DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/config.json DESTINATION etc/iot_device_core)
 
