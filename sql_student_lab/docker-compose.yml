@@ -1,0 +1,11 @@
+services:
+  lab:
+    build: .
+    container_name: sql-student-lab
+    volumes:
+      - teach_db:/data
+    environment:
+      DB_PATH: /data/teach.db
+
+volumes:
+  teach_db:

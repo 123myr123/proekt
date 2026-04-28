@@ -8,16 +8,18 @@ void logError(const std::string& message) {
     std::cerr << "[ERROR] " << message << std::endl;
 }
 
-} // namespace
+}
 
 RelayActuator::RelayActuator(const std::string& name,
                              const std::string& chipName,
                              int lineOffset,
-                             bool activeHigh)
+                             bool activeHigh,
+                             bool simulate)
     : ActuatorBase(name),
       chipName_(chipName),
       lineOffset_(lineOffset),
-      activeHigh_(activeHigh) {}
+      activeHigh_(activeHigh),
+      simulate_(simulate) {}
 
 RelayActuator::~RelayActuator() {
     if (line_) {
@@ -31,6 +33,10 @@ RelayActuator::~RelayActuator() {
 }
 
 bool RelayActuator::init() {
+    if (simulate_) {
+        state_ = false;
+        return true;
+    }
     chip_ = gpiod_chip_open_by_name(chipName_.c_str());
     if (!chip_) {
         logError("Failed to open GPIO chip for relay: " + chipName_);
@@ -54,6 +60,10 @@ bool RelayActuator::init() {
 }
 
 bool RelayActuator::setState(bool on) {
+    if (simulate_) {
+        state_ = on;
+        return true;
+    }
     if (!line_) {
         logError("Relay line is not initialized");
         return false;

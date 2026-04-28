@@ -1,12 +1,12 @@
 #pragma once
 
+#include "database.h"
 #include "dht_sensor.h"
 #include "digital_sensor.h"
 #include "led_actuator.h"
 #include "relay_actuator.h"
 #include "ultrasonic_sensor.h"
 
-#include <chrono>
 #include <memory>
 #include <string>
 
@@ -20,7 +20,12 @@ struct DeviceConfig {
     int ledPin{27};
     int relayPin{22};
 
-    std::chrono::milliseconds pollInterval{1000};
+    float relayDistanceThresholdCm{20.0f};
+    int pollIntervalMs{1000};
+
+    std::string databasePath{"../data/device.db"};
+
+    bool simulateHardware{false};
 };
 
 struct DeviceStatus {
@@ -42,9 +47,9 @@ public:
 
     void runMainLoop();
 
-    [[nodiscard]] DeviceStatus getStatus() const noexcept;
+    DeviceStatus getStatus() const;
 
-    [[nodiscard]] const DeviceConfig& getConfig() const noexcept;
+    const DeviceConfig& getConfig() const;
 
 private:
     DeviceConfig config_{};
@@ -53,6 +58,7 @@ private:
     std::unique_ptr<DigitalSensor> button_;
     std::unique_ptr<LedActuator> led_;
     std::unique_ptr<RelayActuator> relay_;
+    std::unique_ptr<Database> database_;
 
     DeviceStatus status_{};
     bool initialized_{false};
