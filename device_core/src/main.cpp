@@ -9,7 +9,6 @@
 #include <string>
 
 namespace {
-
 void logError(const std::string& message) {
     std::cerr << "[ERROR] " << message << std::endl;
 }
@@ -31,7 +30,7 @@ bool hasGpioAccess(const std::string& chipName) {
     return true;
 }
 
-} // namespace
+}
 
 int main(int argc, char* argv[]) {
     std::string configPath = "config.json";
@@ -46,9 +45,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (!hasGpioAccess(manager.getConfig().gpioChip)) {
-        logError("Insufficient permissions to access GPIO. Exiting.");
-        return 1;
+    if (!manager.getConfig().simulateHardware) {
+        if (!hasGpioAccess(manager.getConfig().gpioChip)) {
+            logError("Insufficient permissions to access GPIO. Exiting.");
+            return 1;
+        }
     }
 
     if (!manager.initDevices()) {

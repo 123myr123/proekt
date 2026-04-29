@@ -9,6 +9,7 @@ echo "Installing required packages..."
 sudo apt install -y \
   build-essential \
   cmake \
+  pkg-config \
   git \
   libgpiod-dev \
   libjsoncpp-dev

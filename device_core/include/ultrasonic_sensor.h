@@ -10,7 +10,8 @@ public:
     UltrasonicSensor(const std::string& name,
                      const std::string& chipName,
                      int triggerOffset,
-                     int echoOffset);
+                     int echoOffset,
+                     bool simulate = false);
     ~UltrasonicSensor() override;
 
     bool init() override;
@@ -22,6 +23,7 @@ private:
     std::string chipName_;
     int triggerOffset_;
     int echoOffset_;
+    bool simulate_{false};
 
     gpiod_chip* chip_{nullptr};
     gpiod_line* triggerLine_{nullptr};

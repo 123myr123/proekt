@@ -7,7 +7,11 @@
 
 class RelayActuator : public ActuatorBase {
 public:
-    RelayActuator(const std::string& name, const std::string& chipName, int lineOffset, bool activeHigh = true);
+    RelayActuator(const std::string& name,
+                  const std::string& chipName,
+                  int lineOffset,
+                  bool activeHigh = true,
+                  bool simulate = false);
     ~RelayActuator() override;
 
     bool init() override;
@@ -18,6 +22,7 @@ private:
     std::string chipName_;
     int lineOffset_;
     bool activeHigh_;
+    bool simulate_{false};
 
     gpiod_chip* chip_{nullptr};
     gpiod_line* line_{nullptr};

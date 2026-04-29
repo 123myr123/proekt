@@ -1,0 +1,17 @@
+[Unit]
+Description=IoT device core (GPIO, SQLite)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=gpio
+WorkingDirectory=/opt/iot_device_full/device_core
+ExecStart=/opt/iot_device_full/device_core/build/iot_device_core /opt/iot_device_full/device_core/config.json
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

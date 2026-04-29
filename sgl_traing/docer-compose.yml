@@ -1,0 +1,11 @@
+services:
+
+  sgl-traing-stand:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: sgl_training_stand
+    ports:
+      - "8090:8090"
+    environment:
+    
